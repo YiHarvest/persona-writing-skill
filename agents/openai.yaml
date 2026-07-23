@@ -1,0 +1,5 @@
+interface:
+  display_name: "人物文风工厂"
+  short_description: "从用户画像匹配人物卡，生成专属卡，并完成可信的文风改写"
+  default_prompt: "使用 $persona-writing-skill 为我的内容匹配人物卡并完成文风改写。"
+
