@@ -15,7 +15,7 @@
 - 区分“本次执行问题”和“人物卡不匹配”，形成反馈闭环
 - 保留原文事实、核心观点和必要限定，避免虚构数据、引语与经历
 - 语义工作全部由模型完成，不把人物匹配或文风生成硬编码进脚本
-- 提供一个仅使用 Python 标准库的状态管理器，可靠维护专属卡、当前卡、索引和反馈
+- 提供一个由 `uv` 执行、仅使用 Python 标准库的状态管理器，可靠维护专属卡、当前卡、索引和反馈
 
 ## 工作模式
 
@@ -139,11 +139,11 @@ git clone https://github.com/YiHarvest/persona-writing-skill.git \
 
 ### 方式三：直接作为提示词使用
 
-不支持自动加载 Agent Skills 的模型，也可以读取或粘贴 `SKILL.md`，并按其中的资源导航按需提供 `references/` 和人物卡内容。此模式仍能完成匹配和改写；能否持久化状态取决于运行环境是否允许执行 Python 或写文件。
+不支持自动加载 Agent Skills 的模型，也可以读取或粘贴 `SKILL.md`，并按其中的资源导航按需提供 `references/` 和人物卡内容。此模式仍能完成匹配和改写；能否持久化状态取决于运行环境是否允许执行 `uv` 和写文件。
 
 ## 状态管理器
 
-`scripts/persona_state.py` 只负责确定性状态操作，不参与语义判断。要求 Python 3.8+，无第三方依赖。
+`scripts/persona_state.py` 只负责确定性状态操作，不参与语义判断。它使用 PEP 723 声明 Python 3.8+ 和空依赖列表，由 `uv` 自动准备兼容的运行环境；无需手动创建虚拟环境或安装 Python 包。
 
 默认状态目录为：
 
@@ -155,24 +155,24 @@ git clone https://github.com/YiHarvest/persona-writing-skill.git \
 
 ```bash
 export PERSONA_WRITING_HOME=/自定义/状态目录
-python3 scripts/persona_state.py --state-dir /临时/状态目录 init
+uv run --script scripts/persona_state.py --state-dir /临时/状态目录 init
 ```
 
 常用命令：
 
 ```bash
 # 初始化状态目录
-python3 scripts/persona_state.py init --json
+uv run --script scripts/persona_state.py init --json
 
 # 列出种子卡和专属卡
-python3 scripts/persona_state.py list --json
+uv run --script scripts/persona_state.py list --json
 
 # 查看或设置当前卡
-python3 scripts/persona_state.py current --json
-python3 scripts/persona_state.py set-current "小五狼" --json
+uv run --script scripts/persona_state.py current --json
+uv run --script scripts/persona_state.py set-current "小五狼" --json
 
 # 保存模型已经生成并检查过的专属卡
-python3 scripts/persona_state.py save \
+uv run --script scripts/persona_state.py save \
   --name "我的专属卡" \
   --source "/临时目录/人物卡.md" \
   --domain "个人成长" \
@@ -181,7 +181,7 @@ python3 scripts/persona_state.py save \
   --json
 
 # 记录反馈
-python3 scripts/persona_state.py add-feedback \
+uv run --script scripts/persona_state.py add-feedback \
   --card "我的专属卡" \
   --type execution \
   --feedback "开头太长" \
@@ -189,10 +189,10 @@ python3 scripts/persona_state.py add-feedback \
   --json
 
 # 检查状态；此命令不会自动修改文件
-python3 scripts/persona_state.py validate --json
+uv run --script scripts/persona_state.py validate --json
 
 # 明确重建索引
-python3 scripts/persona_state.py repair-index --json
+uv run --script scripts/persona_state.py repair-index --json
 ```
 
 种子卡保留在 Skill 目录中，专属卡和反馈保存在外置状态目录中，因此日常使用不会弄脏 Git 仓库，也不容易把私人卡片误提交到公开仓库。
@@ -259,7 +259,7 @@ YYYYMMDD-人物卡名称.md
 项目遵循 Agent Skills 的 `SKILL.md` 与 YAML frontmatter 约定。若当前运行时提供 Skill 校验器，也可以继续执行对应的结构检查，例如：
 
 ```bash
-python /path/to/skill-creator/scripts/quick_validate.py .
+uv run --with pyyaml /path/to/skill-creator/scripts/quick_validate.py .
 ```
 
-没有 Python 时，模型仍可读取种子卡完成匹配和改写；专属卡保存、当前卡和反馈记录会降级为运行环境提供的文件能力。
+没有 `uv` 时，模型仍可读取种子卡完成匹配和改写；专属卡保存、当前卡和反馈记录会降级为运行环境提供的文件能力。
